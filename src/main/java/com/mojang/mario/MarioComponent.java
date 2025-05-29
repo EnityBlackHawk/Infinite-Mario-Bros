@@ -114,17 +114,31 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
         running = false;
     }
 
-    public void run()
+    public void initializeGame()
     {
         graphicsConfiguration = getGraphicsConfiguration();
 
-        //      scene = new LevelScene(graphicsConfiguration);
         mapScene = new MapScene(graphicsConfiguration, this, new Random().nextLong());
         scene = mapScene;
         scene.setSound(sound);
 
         Art.init(graphicsConfiguration, sound);
 
+        addKeyListener(this);
+        addFocusListener(this);
+
+        toTitle();
+        adjustFPS();
+    }
+
+    public void run()
+    {
+        initializeGame();
+        gameLoop();
+        Art.stopMusic();
+    }
+
+    private void gameLoop() {
         VolatileImage image = createVolatileImage(320, 240);
         Graphics g = getGraphics();
         Graphics og = image.getGraphics();
@@ -136,41 +150,10 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
         long tm = System.currentTimeMillis();
         long lTick = tm;
 
-        addKeyListener(this);
-        addFocusListener(this);
-
-        toTitle();
-        adjustFPS();
 
         while (running)
         {
-//            double lastTime = time;
-//            time = System.nanoTime() / 1000000000.0;
-//            double passedTime = time - lastTime;
-//
-//            if (passedTime < 0) naiveTiming = false; // Stop relying on nanotime if it starts skipping around in time (ie running backwards at least once). This sometimes happens on dual core amds.
-//            averagePassedTime = averagePassedTime * 0.9 + passedTime * 0.1;
-//
-//            if (naiveTiming)
-//            {
-//                now = time;
-//            }
-//            else
-//            {
-//                now += averagePassedTime;
-//            }
-//
-//            int tick = (int) (now * TICKS_PER_SECOND);
-//            if (lastTick == -1) lastTick = tick;
-
-                scene.tick();
-//                lastTick++;
-//
-//                if (lastTick % TICKS_PER_SECOND == 0)
-//                {
-//                    fps = renderedFrames;
-//                    renderedFrames = 0;
-//                }
+            scene.tick();
 
             float alpha = (float) (System.currentTimeMillis() - lTick);
             sound.clientTick(alpha);
@@ -181,50 +164,54 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 			int y = (int) (Math.cos(now) * 16 + 120);
 
             //og.setColor(Color.WHITE);
-            og.fillRect(0, 0, 320, 240);
+            renderScene(og, lTick, g, image);
 
-            alpha = 0;
-            scene.render(og, alpha);
-
-            if (!this.hasFocus() && lTick/4%2==0)
-            {
-                String msg = "CLICK TO PLAY";
-
-                drawString(og, msg, 160 - msg.length() * 4 + 1, 110 + 1, 0);
-                drawString(og, msg, 160 - msg.length() * 4, 110, 7);
-            }
-            og.setColor(Color.BLACK);
-            /*          drawString(og, "FPS: " + fps, 5, 5, 0);
-             drawString(og, "FPS: " + fps, 4, 4, 7);*/
-
-            if (width != 320 || height != 240)
-            {
-                if (useScale2x)
-                {
-                    g.drawImage(scale2x.scale(image), 0, 0, null);
-                }
-                else
-                {
-                    g.drawImage(image, 0, 0, 640, 480, null);
-                }
-            }
-            else
-            {
-                g.drawImage(image, 0, 0, null);
-            }
-            
-            if (delay > 0)
+            if (delay > 0) {
                 try {
                     tm += delay;
                     Thread.sleep(Math.max(0, tm - System.currentTimeMillis()));
                 } catch (InterruptedException e) {
                     break;
                 }
+            }
 
             renderedFrames++;
         }
+    }
 
-        Art.stopMusic();
+    private void renderScene(Graphics og, long lTick, Graphics g, VolatileImage image) {
+        float alpha;
+        og.fillRect(0, 0, 320, 240);
+
+        alpha = 0;
+        scene.render(og, alpha);
+
+        if (!this.hasFocus() && lTick /4%2==0)
+        {
+            String msg = "CLICK TO PLAY";
+
+            drawString(og, msg, 160 - msg.length() * 4 + 1, 110 + 1, 0);
+            drawString(og, msg, 160 - msg.length() * 4, 110, 7);
+        }
+        og.setColor(Color.BLACK);
+            /*          drawString(og, "FPS: " + fps, 5, 5, 0);
+             drawString(og, "FPS: " + fps, 4, 4, 7);*/
+
+        if (width != 320 || height != 240)
+        {
+            if (useScale2x)
+            {
+                g.drawImage(scale2x.scale(image), 0, 0, null);
+            }
+            else
+            {
+                g.drawImage(image, 0, 0, 640, 480, null);
+            }
+        }
+        else
+        {
+            g.drawImage(image, 0, 0, null);
+        }
     }
 
     private void drawString(Graphics g, String text, int x, int y, int c)
