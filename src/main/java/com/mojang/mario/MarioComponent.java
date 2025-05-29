@@ -32,7 +32,17 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
     private MapScene mapScene;
     int delay;
 
-    private Scale2x scale2x = new Scale2x(320, 240);
+    private static final int DEFAULT_WIDTH = 320;
+    private static final int DEFAULT_HEIGHT = 240;
+    private static final int MAX_SOUND_CHANNELS = 64;
+    private static final int BLINK_INTERVAL = 4;
+    private static final String CLICK_TO_PLAY_MESSAGE = "CLICK TO PLAY";
+    private static final int MESSAGE_X_OFFSET = 160 - CLICK_TO_PLAY_MESSAGE.length() * 4;
+    private static final int MESSAGE_Y_OFFSET = 110;
+    private static final int SHADOW_COLOR = 0;
+    private static final int TEXT_COLOR = 7;
+
+    private Scale2x scale2x = new Scale2x(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
     public MarioComponent(int width, int height)
     {
@@ -48,7 +58,7 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
         try
         {
-            sound = new SonarSoundEngine(64);
+            sound = new SonarSoundEngine(MAX_SOUND_CHANNELS);
         }
         catch (LineUnavailableException e)
         {
@@ -139,7 +149,7 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
     }
 
     private void gameLoop() {
-        VolatileImage image = createVolatileImage(320, 240);
+        VolatileImage image = createVolatileImage(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         Graphics g = getGraphics();
         Graphics og = image.getGraphics();
 
@@ -157,11 +167,6 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
             float alpha = (float) (System.currentTimeMillis() - lTick);
             sound.clientTick(alpha);
-
-            @SuppressWarnings("unused")
-			int x = (int) (Math.sin(now) * 16 + 160);
-            @SuppressWarnings("unused")
-			int y = (int) (Math.cos(now) * 16 + 120);
 
             //og.setColor(Color.WHITE);
             renderScene(og, lTick, g, image);
@@ -181,23 +186,23 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
     private void renderScene(Graphics og, long lTick, Graphics g, VolatileImage image) {
         float alpha;
-        og.fillRect(0, 0, 320, 240);
+        og.fillRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         alpha = 0;
         scene.render(og, alpha);
 
-        if (!this.hasFocus() && lTick /4%2==0)
+        if (!this.hasFocus() && lTick / BLINK_INTERVAL % 2 == 0)
         {
-            String msg = "CLICK TO PLAY";
+            String msg = CLICK_TO_PLAY_MESSAGE;
 
-            drawString(og, msg, 160 - msg.length() * 4 + 1, 110 + 1, 0);
-            drawString(og, msg, 160 - msg.length() * 4, 110, 7);
+            drawString(og, msg, MESSAGE_X_OFFSET + 1, MESSAGE_Y_OFFSET + 1, SHADOW_COLOR);
+            drawString(og, msg, MESSAGE_X_OFFSET, MESSAGE_Y_OFFSET, TEXT_COLOR);
         }
         og.setColor(Color.BLACK);
             /*          drawString(og, "FPS: " + fps, 5, 5, 0);
              drawString(og, "FPS: " + fps, 4, 4, 7);*/
 
-        if (width != 320 || height != 240)
+        if (width != DEFAULT_WIDTH || height != DEFAULT_HEIGHT)
         {
             if (useScale2x)
             {
@@ -205,7 +210,7 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
             }
             else
             {
-                g.drawImage(image, 0, 0, 640, 480, null);
+                g.drawImage(image, 0, 0, 2 * DEFAULT_WIDTH, 2 * DEFAULT_HEIGHT, null);
             }
         }
         else
@@ -216,10 +221,13 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
     private void drawString(Graphics g, String text, int x, int y, int c)
     {
+        final int CHAR_OFFSET = 32;
+        final int CHAR_WIDTH = 8;
+
         char[] ch = text.toCharArray();
         for (int i = 0; i < ch.length; i++)
         {
-            g.drawImage(Art.font[ch[i] - 32][c], x + i * 8, y, null);
+            g.drawImage(Art.font[ch[i] - CHAR_OFFSET][c], x + i * CHAR_WIDTH, y, null);
         }
     }
 
