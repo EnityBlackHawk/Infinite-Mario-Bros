@@ -10,3 +10,4 @@ target/*
 .classpath
 _site
 index.markdown
+.idea
