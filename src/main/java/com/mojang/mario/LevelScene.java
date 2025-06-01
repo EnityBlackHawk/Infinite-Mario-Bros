@@ -306,92 +306,105 @@ public class LevelScene extends Scene implements SpriteContext
     {
         int xCam = (int) (mario.xOld + (mario.x - mario.xOld) * alpha) - 160;
         int yCam = (int) (mario.yOld + (mario.y - mario.yOld) * alpha) - 120;
-        //int xCam = (int) (xCamO + (this.xCam - xCamO) * alpha);
-        //        int yCam = (int) (yCamO + (this.yCam - yCamO) * alpha);
-        if (xCam < 0) xCam = 0;
-        if (yCam < 0) yCam = 0;
-        if (xCam > level.width * 16 - 320) xCam = level.width * 16 - 320;
-        if (yCam > level.height * 16 - 240) yCam = level.height * 16 - 240;
+        xCam = clamp(xCam, 0, level.width * 16 - 320);
+        yCam = clamp(yCam, 0, level.height * 16 - 240);
 
-        //      g.drawImage(Art.background, 0, 0, null);
+        renderBackground(g, xCam, yCam, alpha);
+        renderSprites(g, xCam, yCam, alpha);
+        renderLevel(g, xCam, yCam, alpha);
+        renderForegroundSprites(g, xCam, yCam, alpha);
+        renderUI(g);
 
-        for (int i = 0; i < 2; i++)
-        {
+        if (startTime > 0) {
+            renderStartBlackout(g, alpha);
+        }
+        if (mario.winTime > 0) {
+            renderWinBlackout(g, xCam, yCam, alpha);
+        }
+        if (mario.deathTime > 0) {
+            renderDeathBlackout(g, xCam, yCam, alpha);
+        }
+    }
+
+    private int clamp(int val, int min, int max) {
+        if (val < min) return min;
+        if (val > max) return max;
+        return val;
+    }
+
+    private void renderBackground(Graphics g, int xCam, int yCam, float alpha) {
+        for (int i = 0; i < 2; i++) {
             bgLayer[i].setCam(xCam, yCam);
             bgLayer[i].render(g, tick, alpha);
         }
+    }
 
+    private void renderSprites(Graphics g, int xCam, int yCam, float alpha) {
         g.translate(-xCam, -yCam);
-        for (Sprite sprite : sprites)
-        {
+        for (Sprite sprite : sprites) {
             if (sprite.layer == 0) sprite.render(g, alpha);
         }
         g.translate(xCam, yCam);
+    }
 
+    private void renderLevel(Graphics g, int xCam, int yCam, float alpha) {
         layer.setCam(xCam, yCam);
-        layer.render(g, tick, paused?0:alpha);
-        layer.renderExit0(g, tick, paused?0:alpha, mario.winTime==0);
+        layer.render(g, tick, paused ? 0 : alpha);
+        layer.renderExit0(g, tick, paused ? 0 : alpha, mario.winTime == 0);
+    }
 
+    private void renderForegroundSprites(Graphics g, int xCam, int yCam, float alpha) {
         g.translate(-xCam, -yCam);
-        for (Sprite sprite : sprites)
-        {
+        for (Sprite sprite : sprites) {
             if (sprite.layer == 1) sprite.render(g, alpha);
         }
         g.translate(xCam, yCam);
         g.setColor(Color.BLACK);
-        layer.renderExit1(g, tick, paused?0:alpha);
-        
+        layer.renderExit1(g, tick, paused ? 0 : alpha);
+    }
+
+    private void renderUI(Graphics g) {
         drawStringDropShadow(g, "MARIO " + df.format(Mario.lives), 0, 0, 7);
         drawStringDropShadow(g, "00000000", 0, 1, 7);
-        
+
         drawStringDropShadow(g, "COIN", 14, 0, 7);
-        drawStringDropShadow(g, " "+df.format(Mario.coins), 14, 1, 7);
+        drawStringDropShadow(g, " " + df.format(Mario.coins), 14, 1, 7);
 
         drawStringDropShadow(g, "WORLD", 24, 0, 7);
-        drawStringDropShadow(g, " "+Mario.levelString, 24, 1, 7);
+        drawStringDropShadow(g, " " + Mario.levelString, 24, 1, 7);
 
         drawStringDropShadow(g, "TIME", 35, 0, 7);
-        int time = (timeLeft+15-1)/15;
-        if (time<0) time = 0;
-        drawStringDropShadow(g, " "+df2.format(time), 35, 1, 7);
+        int time = (timeLeft + 15 - 1) / 15;
+        if (time < 0) time = 0;
+        drawStringDropShadow(g, " " + df2.format(time), 35, 1, 7);
+    }
 
+    private void renderStartBlackout(Graphics g, float alpha) {
+        float t = startTime + alpha - 2;
+        t = t * t * 0.6f;
+        renderBlackout(g, 160, 120, (int) (t));
+    }
 
-        if (startTime > 0)
-        {
-            float t = startTime + alpha - 2;
-            t = t * t * 0.6f;
-            renderBlackout(g, 160, 120, (int) (t));
-        }
-//        mario.x>level.xExit*16
-        if (mario.winTime > 0)
-        {
-            float t = mario.winTime + alpha;
-            t = t * t * 0.2f;
+    private void renderWinBlackout(Graphics g, int xCam, int yCam, float alpha) {
+        float t = mario.winTime + alpha;
+        t = t * t * 0.2f;
 
-            if (t > 900)
-            {
-                renderer.levelWon();
-                //              replayer = new Replayer(recorder.getBytes());
-//                init();
-            }
-
-            renderBlackout(g, (int) (mario.xDeathPos - xCam), (int) (mario.yDeathPos - yCam), (int) (320 - t));
+        if (t > 900) {
+            renderer.levelWon();
         }
 
-        if (mario.deathTime > 0)
-        {
-            float t = mario.deathTime + alpha;
-            t = t * t * 0.4f;
+        renderBlackout(g, (int) (mario.xDeathPos - xCam), (int) (mario.yDeathPos - yCam), (int) (320 - t));
+    }
 
-            if (t > 1800)
-            {
-                renderer.levelFailed();
-                //              replayer = new Replayer(recorder.getBytes());
-//                init();
-            }
+    private void renderDeathBlackout(Graphics g, int xCam, int yCam, float alpha) {
+        float t = mario.deathTime + alpha;
+        t = t * t * 0.4f;
 
-            renderBlackout(g, (int) (mario.xDeathPos - xCam), (int) (mario.yDeathPos - yCam), (int) (320 - t));
+        if (t > 1800) {
+            renderer.levelFailed();
         }
+
+        renderBlackout(g, (int) (mario.xDeathPos - xCam), (int) (mario.yDeathPos - yCam), (int) (320 - t));
     }
 
     private void drawStringDropShadow(Graphics g, String text, int x, int y, int c)
@@ -402,11 +415,7 @@ public class LevelScene extends Scene implements SpriteContext
     
     private void drawString(Graphics g, String text, int x, int y, int c)
     {
-        char[] ch = text.toCharArray();
-        for (int i = 0; i < ch.length; i++)
-        {
-            g.drawImage(Art.font[ch[i] - 32][c], x + i * 8, y, null);
-        }
+        Utils.drawString(g, text, x, y, c);
     }
     
     private void renderBlackout(Graphics g, int x, int y, int radius)

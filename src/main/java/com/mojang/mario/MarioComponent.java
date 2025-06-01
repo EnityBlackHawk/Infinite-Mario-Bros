@@ -221,14 +221,7 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
     private void drawString(Graphics g, String text, int x, int y, int c)
     {
-        final int CHAR_OFFSET = 32;
-        final int CHAR_WIDTH = 8;
-
-        char[] ch = text.toCharArray();
-        for (int i = 0; i < ch.length; i++)
-        {
-            g.drawImage(Art.font[ch[i] - CHAR_OFFSET][c], x + i * CHAR_WIDTH, y, null);
-        }
+        Utils.drawString(g,text,x,y,c);
     }
 
     public void keyPressed(KeyEvent arg0)

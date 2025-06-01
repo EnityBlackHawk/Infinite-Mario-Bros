@@ -16,6 +16,7 @@ public class MapScene extends Scene
     private static final int TILE_LEVEL = 2;
     private static final int TILE_ROAD = 3;
     private static final int TILE_DECORATION = 4;
+    private final Utils utils = new Utils();
 
     private int[][] level;
     private int[][] data;
@@ -463,17 +464,13 @@ public class MapScene extends Scene
 
     private void drawStringDropShadow(Graphics g, String text, int x, int y, int c)
     {
-        drawString(g, text, x*8+5, y*8+5, 0);
-        drawString(g, text, x*8+4, y*8+4, c);
+        utils.drawString(g, text, x * 8 + 5, y * 8 + 5, 0);
+        utils.drawString(g, text, x * 8 + 4, y * 8 + 4, c);
     }
     
     private void drawString(Graphics g, String text, int x, int y, int c)
     {
-        char[] ch = text.toCharArray();
-        for (int i = 0; i < ch.length; i++)
-        {
-            g.drawImage(Art.font[ch[i] - 32][c], x + i * 8, y, null);
-        }
+        utils.drawString(g, text, x, y, c);
     }
 
     private boolean isRoad(int x, int y)
