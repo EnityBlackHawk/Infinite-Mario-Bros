@@ -36,9 +36,9 @@ public class AppletLauncher extends JApplet
         if (started)
         {
             started = false;
-            removeKeyListener(mario);
+            //removeKeyListener(mario);
             mario.stop();
-            removeFocusListener(mario);
+            //removeFocusListener(mario);
         }
     }
 }

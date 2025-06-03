@@ -1,10 +1,6 @@
 package com.mojang.mario;
 
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.*;
 import java.util.Random;
 
@@ -16,7 +12,7 @@ import com.mojang.sonar.FakeSoundEngine;
 import com.mojang.sonar.SonarSoundEngine;
 
 
-public class MarioComponent extends JComponent implements Runnable, KeyListener, FocusListener
+public class MarioComponent extends JComponent implements Runnable
 {
     private static final long serialVersionUID = 739318775993206607L;
     public static final int TICKS_PER_SECOND = 24;
@@ -24,11 +20,8 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
     private boolean running = false;
     private int width, height;
     private GraphicsConfiguration graphicsConfiguration;
-    private Scene scene;
-    private SonarSoundEngine sound;
-    @SuppressWarnings("unused")
-	private boolean focused = false;
-    private boolean useScale2x = false;
+    private GameState gameState = new GameState();
+    private GameInputHandler inputHandler = new GameInputHandler(gameState);
     private MapScene mapScene;
     int delay;
 
@@ -58,47 +51,15 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
         try
         {
-            sound = new SonarSoundEngine(MAX_SOUND_CHANNELS);
+            gameState.setSound(new SonarSoundEngine(MAX_SOUND_CHANNELS));
         }
         catch (LineUnavailableException e)
         {
             e.printStackTrace();
-            sound = new FakeSoundEngine();
+            gameState.setSound( new FakeSoundEngine());
         }
 
         setFocusable(true);
-    }
-
-    private void toggleKey(int keyCode, boolean isPressed)
-    {
-        if (keyCode == KeyEvent.VK_LEFT)
-        {
-            scene.toggleKey(Mario.KEY_LEFT, isPressed);
-        }
-        if (keyCode == KeyEvent.VK_RIGHT)
-        {
-            scene.toggleKey(Mario.KEY_RIGHT, isPressed);
-        }
-        if (keyCode == KeyEvent.VK_DOWN)
-        {
-            scene.toggleKey(Mario.KEY_DOWN, isPressed);
-        }
-        if (keyCode == KeyEvent.VK_UP)
-        {
-            scene.toggleKey(Mario.KEY_UP, isPressed);
-        }
-        if (keyCode == KeyEvent.VK_A)
-        {
-            scene.toggleKey(Mario.KEY_SPEED, isPressed);
-        }
-        if (keyCode == KeyEvent.VK_S)
-        {
-            scene.toggleKey(Mario.KEY_JUMP, isPressed);
-        }
-        if (isPressed && keyCode == KeyEvent.VK_F1)
-        {
-            useScale2x = !useScale2x;
-        }
     }
 
     public void paint(Graphics g)
@@ -129,13 +90,12 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
         graphicsConfiguration = getGraphicsConfiguration();
 
         mapScene = new MapScene(graphicsConfiguration, this, new Random().nextLong());
-        scene = mapScene;
-        scene.setSound(sound);
+        gameState.setScene(mapScene);
 
-        Art.init(graphicsConfiguration, sound);
+        Art.init(graphicsConfiguration, gameState.getSound());
 
-        addKeyListener(this);
-        addFocusListener(this);
+        addKeyListener(inputHandler);
+        addFocusListener(inputHandler);
 
         toTitle();
         adjustFPS();
@@ -163,10 +123,10 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
         while (running)
         {
-            scene.tick();
+
 
             float alpha = (float) (System.currentTimeMillis() - lTick);
-            sound.clientTick(alpha);
+            gameState.tick(alpha);
 
             //og.setColor(Color.WHITE);
             renderScene(og, lTick, g, image);
@@ -189,7 +149,7 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
         og.fillRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         alpha = 0;
-        scene.render(og, alpha);
+        gameState.render(og, alpha);
 
         if (!this.hasFocus() && lTick / BLINK_INTERVAL % 2 == 0)
         {
@@ -204,14 +164,7 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
 
         if (width != DEFAULT_WIDTH || height != DEFAULT_HEIGHT)
         {
-            if (useScale2x)
-            {
-                g.drawImage(scale2x.scale(image), 0, 0, null);
-            }
-            else
-            {
-                g.drawImage(image, 0, 0, 2 * DEFAULT_WIDTH, 2 * DEFAULT_HEIGHT, null);
-            }
+            g.drawImage(image, 0, 0, 2 * DEFAULT_WIDTH, 2 * DEFAULT_HEIGHT, null);
         }
         else
         {
@@ -224,26 +177,16 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
         Utils.drawString(g,text,x,y,c);
     }
 
-    public void keyPressed(KeyEvent arg0)
-    {
-        toggleKey(arg0.getKeyCode(), true);
-    }
-
-    public void keyReleased(KeyEvent arg0)
-    {
-        toggleKey(arg0.getKeyCode(), false);
-    }
 
     public void startLevel(long seed, int difficulty, int type)
     {
-        scene = new LevelScene(graphicsConfiguration, this, seed, difficulty, type);
-        scene.setSound(sound);
-        scene.init();
+        gameState.setScene(new LevelScene(graphicsConfiguration, this, seed, difficulty, type));
+
     }
 
     public void levelFailed()
     {
-        scene = mapScene;
+        gameState.setScene(mapScene);
         mapScene.startMusic();
         Mario.lives--;
         if (Mario.lives == 0)
@@ -252,54 +195,34 @@ public class MarioComponent extends JComponent implements Runnable, KeyListener,
         }
     }
 
-    public void keyTyped(KeyEvent arg0)
-    {
-    }
-
-    public void focusGained(FocusEvent arg0)
-    {
-        focused = true;
-    }
-
-    public void focusLost(FocusEvent arg0)
-    {
-        focused = false;
-    }
 
     public void levelWon()
     {
-        scene = mapScene;
+        gameState.setScene(mapScene);
         mapScene.startMusic();
         mapScene.levelWon();
     }
     
     public void win()
     {
-        scene = new WinScene(this);
-        scene.setSound(sound);
-        scene.init();
+        gameState.setScene(new WinScene(this));
     }
     
     public void toTitle()
     {
         Mario.resetStatic();
-        scene = new TitleScene(this, graphicsConfiguration);
-        scene.setSound(sound);
-        scene.init();
+        gameState.setScene(new TitleScene(this, graphicsConfiguration));
     }
     
     public void lose()
     {
-        scene = new LoseScene(this);
-        scene.setSound(sound);
-        scene.init();
+        gameState.setScene(new LoseScene(this));
     }
 
     public void startGame()
     {
-        scene = mapScene;
+        gameState.setScene(mapScene);
         mapScene.startMusic();
-        mapScene.init();
    }
     
     public void adjustFPS() {
