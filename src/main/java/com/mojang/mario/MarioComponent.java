@@ -41,8 +41,8 @@ public class MarioComponent extends JComponent implements Runnable
     {
         this.setFocusable(true);
         this.setEnabled(true);
-        this.width = width;
-        this.height = height;
+        this.width = width > 0 ? width : DEFAULT_WIDTH;
+        this.height = height > 0 ? height : DEFAULT_HEIGHT;
 
         Dimension size = new Dimension(width, height);
         setPreferredSize(size);
@@ -89,10 +89,10 @@ public class MarioComponent extends JComponent implements Runnable
     {
         graphicsConfiguration = getGraphicsConfiguration();
 
+        Art.init(graphicsConfiguration, gameState.getSound());
+
         mapScene = new MapScene(graphicsConfiguration, this, new Random().nextLong());
         gameState.setScene(mapScene);
-
-        Art.init(graphicsConfiguration, gameState.getSound());
 
         addKeyListener(inputHandler);
         addFocusListener(inputHandler);
@@ -162,14 +162,8 @@ public class MarioComponent extends JComponent implements Runnable
             /*          drawString(og, "FPS: " + fps, 5, 5, 0);
              drawString(og, "FPS: " + fps, 4, 4, 7);*/
 
-        if (width != DEFAULT_WIDTH || height != DEFAULT_HEIGHT)
-        {
-            g.drawImage(image, 0, 0, 2 * DEFAULT_WIDTH, 2 * DEFAULT_HEIGHT, null);
-        }
-        else
-        {
-            g.drawImage(image, 0, 0, null);
-        }
+        g.drawImage(image, 0, 0, width, height, null);
+
     }
 
     private void drawString(Graphics g, String text, int x, int y, int c)
