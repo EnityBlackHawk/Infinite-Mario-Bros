@@ -2,6 +2,7 @@ package com.mojang.mario;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.util.Map;
 import java.util.Random;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -21,7 +22,7 @@ public class MarioComponent extends JComponent implements Runnable
     private int width, height;
     private GraphicsConfiguration graphicsConfiguration;
     private GameState gameState = new GameState();
-    private GameInputHandler inputHandler = new GameInputHandler(gameState);
+    private GameInputHandler inputHandler;
     private MapScene mapScene;
     int delay;
 
@@ -37,8 +38,9 @@ public class MarioComponent extends JComponent implements Runnable
 
     private Scale2x scale2x = new Scale2x(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-    public MarioComponent(int width, int height)
+    public MarioComponent(int width, int height, Map<Integer, Integer> keyBindings)
     {
+        this.inputHandler = new GameInputHandler(gameState, keyBindings);
         this.setFocusable(true);
         this.setEnabled(true);
         this.width = width > 0 ? width : DEFAULT_WIDTH;
@@ -113,8 +115,6 @@ public class MarioComponent extends JComponent implements Runnable
         Graphics g = getGraphics();
         Graphics og = image.getGraphics();
 
-        int renderedFrames = 0;
-
         double time = System.nanoTime() / 1000000000.0;
         double now = time;
         long tm = System.currentTimeMillis();
@@ -140,7 +140,6 @@ public class MarioComponent extends JComponent implements Runnable
                 }
             }
 
-            renderedFrames++;
         }
     }
 

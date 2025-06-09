@@ -5,8 +5,9 @@ import javax.swing.*;
 
 public class FrameLauncher
 {
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws Exception {
+
+        var binding = KeyBindingImporter.importKeyBindings("keys.txt");
 
         int width = 640;
         int height = 480;
@@ -21,7 +22,7 @@ public class FrameLauncher
             }
         }
 
-        MarioComponent mario = new MarioComponent(width, height);
+        MarioComponent mario = new MarioComponent(width, height, binding);
         GraphicsEnvironment graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = graphics.getDefaultScreenDevice();
 

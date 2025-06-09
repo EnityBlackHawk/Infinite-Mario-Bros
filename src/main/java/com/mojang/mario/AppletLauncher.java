@@ -1,6 +1,7 @@
 package com.mojang.mario;
 
 import javax.swing.JApplet;
+import java.util.Map;
 
 
 public class AppletLauncher extends JApplet
@@ -19,8 +20,15 @@ public class AppletLauncher extends JApplet
     {
         if (!started)
         {
+            Map<Integer, Integer> binding;
+            try {
+                binding = KeyBindingImporter.importKeyBindings("keys.txt");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
             started = true;
-            mario = new MarioComponent(getWidth(), getHeight());
+            mario = new MarioComponent(getWidth(), getHeight(), binding);
             setContentPane(mario);
             setFocusable(false);
             mario.setFocusCycleRoot(true);
