@@ -7,20 +7,35 @@ public class FrameLauncher
 {
     public static void main(String[] args)
     {
-        MarioComponent mario = new MarioComponent(640, 480);
+
+        int width = 640;
+        int height = 480;
+        boolean fullscreen = false;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        for(String arg : args) {
+            if(arg.equals("--fullscreen")) {
+                width = screenSize.width;
+                height = screenSize.height;
+                fullscreen = true;
+            }
+        }
+
+        MarioComponent mario = new MarioComponent(width, height);
         GraphicsEnvironment graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = graphics.getDefaultScreenDevice();
 
         JFrame frame = new JFrame("Infinite Mario Bros.");
-        frame.setUndecorated(true);
+        frame.setUndecorated(fullscreen);
         frame.setContentPane(mario);
         frame.pack();
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        device.setFullScreenWindow(frame);
+        if (fullscreen) {
+            device.setFullScreenWindow(frame);
+        }
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setLocation((screenSize.width-frame.getWidth())/2, (screenSize.height-frame.getHeight())/2);
         
         frame.setVisible(true);
