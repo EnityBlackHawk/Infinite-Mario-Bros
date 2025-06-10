@@ -8,8 +8,11 @@ public class GameState { // Classe responsável pelos estados do jogo
     private Boolean focus;
     private SonarSoundEngine sound;
     private Boolean isPaused = false;
+    private Boolean easyMode = false;
 
-    public GameState() {}
+    public GameState(boolean easyMode) {
+        this.easyMode = easyMode;
+    }
 
     public Scene getScene() {
         return scene;
@@ -57,4 +60,9 @@ public class GameState { // Classe responsável pelos estados do jogo
         this.sound = sound;
     }
 
+
+
+    public Boolean getEasyMode() {
+        return easyMode;
+    }
 }

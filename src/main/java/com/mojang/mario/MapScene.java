@@ -455,8 +455,12 @@ public class MapScene extends Scene
                 g.drawImage(map[(tick) / 6 % 2+4][1], xMario + (int) (xMarioA * alpha), yMario + (int) (yMarioA * alpha) - 6, null);
             }
         }
-        
-        drawStringDropShadow(g, "MARIO " + df.format(Mario.lives), 0, 0, 7);
+
+        if(marioComponent.getGameState().getEasyMode()) {
+            drawStringDropShadow(g, "MARIO", 0, 0, 7);
+        } else {
+            drawStringDropShadow(g, "MARIO " + df.format(Mario.lives), 0, 0, 7);
+        }
 
         drawStringDropShadow(g, "WORLD "+(worldNumber+1), 32, 0, 7);
     }

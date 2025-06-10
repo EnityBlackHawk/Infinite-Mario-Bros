@@ -12,6 +12,7 @@ public class FrameLauncher
         int width = 640;
         int height = 480;
         boolean fullscreen = false;
+        boolean easyMode = false;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
         for(String arg : args) {
@@ -19,10 +20,12 @@ public class FrameLauncher
                 width = screenSize.width;
                 height = screenSize.height;
                 fullscreen = true;
+            } else if(arg.equals("--easy")) {
+                easyMode = true;
             }
         }
 
-        MarioComponent mario = new MarioComponent(width, height, binding); // Passa as configurações de teclas para o MarioComponent(Responsável pela coordenação das cenas, funções do jogo, etc)
+        MarioComponent mario = new MarioComponent(width, height, binding, easyMode); // Passa as configurações de teclas para o MarioComponent(Responsável pela coordenação das cenas, funções do jogo, etc)
         GraphicsEnvironment graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = graphics.getDefaultScreenDevice();
 

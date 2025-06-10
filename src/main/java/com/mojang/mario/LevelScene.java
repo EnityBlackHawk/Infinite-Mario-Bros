@@ -124,11 +124,14 @@ public class LevelScene extends Scene implements SpriteContext
 
     public void tick()
     {
-        timeLeft--;
-        if (timeLeft==0)
-        {
-            mario.die();
+        if(!renderer.getGameState().getEasyMode()) {
+            timeLeft--;
+            if (timeLeft==0)
+            {
+                mario.die();
+            }
         }
+
         xCamO = xCam;
         yCamO = yCam;
 
@@ -374,9 +377,13 @@ public class LevelScene extends Scene implements SpriteContext
         drawStringDropShadow(g, " " + Mario.levelString, 24, 1, 7);
 
         drawStringDropShadow(g, "TIME", 35, 0, 7);
-        int time = (timeLeft + 15 - 1) / 15;
-        if (time < 0) time = 0;
-        drawStringDropShadow(g, " " + df2.format(time), 35, 1, 7);
+        if(!renderer.getGameState().getEasyMode()) {
+            int time = (timeLeft + 15 - 1) / 15;
+            if (time < 0) time = 0;
+            drawStringDropShadow(g, " " + df2.format(time), 35, 1, 7);
+        } else {
+            drawStringDropShadow(g, "INF", 35, 1, 7);
+        }
     }
 
     private void renderStartBlackout(Graphics g, float alpha) {

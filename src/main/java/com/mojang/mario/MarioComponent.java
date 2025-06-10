@@ -21,7 +21,7 @@ public class MarioComponent extends JComponent implements Runnable
     private boolean running = false;
     private int width, height;
     private GraphicsConfiguration graphicsConfiguration;
-    private GameState gameState = new GameState();
+    private GameState gameState;
     private GameInputHandler inputHandler;
     private MapScene mapScene;
     int delay;
@@ -38,8 +38,9 @@ public class MarioComponent extends JComponent implements Runnable
 
     private Scale2x scale2x = new Scale2x(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-    public MarioComponent(int width, int height, Map<Integer, Integer> keyBindings)
+    public MarioComponent(int width, int height, Map<Integer, Integer> keyBindings, boolean isEasy)
     {
+        this.gameState = new GameState(isEasy);
         this.inputHandler = new GameInputHandler(gameState, keyBindings);
         this.setFocusable(true);
         this.setEnabled(true);
@@ -183,11 +184,16 @@ public class MarioComponent extends JComponent implements Runnable
     {
         gameState.setScene(mapScene);
         mapScene.startMusic();
-        Mario.lives--;
-        if (Mario.lives == 0)
-        {
-            lose();
+
+        if(!gameState.getEasyMode()) {
+            Mario.lives--;
+            if (Mario.lives == 0)
+            {
+                lose();
+            }
         }
+
+
     }
 
 
@@ -224,5 +230,9 @@ public class MarioComponent extends JComponent implements Runnable
         int fps = 24;
         delay = (fps > 0) ? (fps >= 100) ? 0 : (1000 / fps) : 100;
 //        System.out.println("Delay: " + delay);
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 }
