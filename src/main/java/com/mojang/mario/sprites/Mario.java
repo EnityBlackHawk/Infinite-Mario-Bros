@@ -8,7 +8,7 @@ import com.mojang.mario.LevelScene;
 import com.mojang.sonar.FixedSoundSource;
 
 
-public class Mario extends Sprite
+public class Mario extends Sprite // Classe onde guarda as teclas
 {
     public static boolean large = false;
     public static boolean fire = false;
@@ -31,6 +31,7 @@ public class Mario extends Sprite
     public static final int KEY_UP = 3;
     public static final int KEY_JUMP = 4;
     public static final int KEY_SPEED = 5;
+    public static final int KEY_PAUSE = 6;
 
     private static float GROUND_INERTIA = 0.89f;
     private static float AIR_INERTIA = 0.89f;

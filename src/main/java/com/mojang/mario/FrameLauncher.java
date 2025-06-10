@@ -7,7 +7,7 @@ public class FrameLauncher
 {
     public static void main(String[] args) throws Exception {
 
-        var binding = KeyBindingImporter.importKeyBindings("keys.txt");
+        var binding = KeyBindingImporter.importKeyBindings("keys.txt"); // Importa o arquivo que contém a função de conversão das teclas
 
         int width = 640;
         int height = 480;
@@ -22,7 +22,7 @@ public class FrameLauncher
             }
         }
 
-        MarioComponent mario = new MarioComponent(width, height, binding);
+        MarioComponent mario = new MarioComponent(width, height, binding); // Passa as configurações de teclas para o MarioComponent(Responsável pela coordenação das cenas, funções do jogo, etc)
         GraphicsEnvironment graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = graphics.getDefaultScreenDevice();
 

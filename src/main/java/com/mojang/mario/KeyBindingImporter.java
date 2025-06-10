@@ -26,6 +26,6 @@ public class KeyBindingImporter {
             }
         }
         return keyBindings;
-    }
+    } // Função de conversão dos arquivos para ler as teclas setadas no txt
 
 }

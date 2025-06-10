@@ -2,11 +2,12 @@ package com.mojang.mario;
 
 import com.mojang.sonar.SonarSoundEngine;
 
-public class GameState {
+public class GameState { // Classe responsável pelos estados do jogo
 
     private Scene scene;
     private Boolean focus;
     private SonarSoundEngine sound;
+    private Boolean isPaused = false;
 
     public GameState() {}
 
@@ -31,6 +32,14 @@ public class GameState {
         this.scene = scene;
         scene.setSound(sound);
         scene.init();
+    }
+
+    public Boolean getPaused() {
+        return isPaused;
+    }
+
+    public void setPaused(Boolean paused) {
+        isPaused = paused;
     }
 
     public Boolean getFocus() {

@@ -1,5 +1,7 @@
 package com.mojang.mario;
 
+import com.mojang.mario.sprites.Mario;
+
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -16,12 +18,24 @@ public class GameInputHandler implements KeyListener, FocusListener {
         this.keyBindings = keyBindings;
     }
 
-    private void toggleKey(int keyCode, boolean isPressed)
+
+
+    private void toggleKey(int keyCode, boolean isPressed) // Função responsável por verificar a ação da tecla e passar para a cena atual.
     {
 
         if (keyBindings != null && keyBindings.containsKey(keyCode)) {
+
+            final int action = keyBindings.get(keyCode);
+            if(action == Mario.KEY_PAUSE) {
+                if(isPressed) {
+                    gameState.setPaused(!gameState.getPaused());
+                }
+                return;
+            }
+
             gameState.getScene().toggleKey(keyBindings.get(keyCode), isPressed);
         }
+
     }
 
     public void setKeyBindings(Map<Integer, Integer> keyBindings) {

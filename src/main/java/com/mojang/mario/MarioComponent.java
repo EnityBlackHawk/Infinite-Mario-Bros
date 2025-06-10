@@ -8,7 +8,7 @@ import java.util.Random;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 
-import com.mojang.mario.sprites.*;
+import com.mojang.mario.sprites.Mario;
 import com.mojang.sonar.FakeSoundEngine;
 import com.mojang.sonar.SonarSoundEngine;
 
@@ -124,9 +124,11 @@ public class MarioComponent extends JComponent implements Runnable
         while (running)
         {
 
-
             float alpha = (float) (System.currentTimeMillis() - lTick);
-            gameState.tick(alpha);
+
+            if(!gameState.getPaused()) {
+                gameState.tick(alpha); // Responsável pela não execução da função de atualizar (tick)
+            }
 
             //og.setColor(Color.WHITE);
             renderScene(og, lTick, g, image);
